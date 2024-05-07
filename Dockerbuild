@@ -38,7 +38,7 @@ pipeline {
                   apiVersion: apps/v1
                   kind: Deployment
                   metadata:
-                    name: Facitest
+                    name: facitest
                   spec:
                     replicas: 1
                     selector:
