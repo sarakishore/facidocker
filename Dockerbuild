@@ -1,81 +1,81 @@
 pipeline {
     agent any    
     stages {
-        stage('Repo Checkout') {
-            steps {
-                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'Github', url: 'https://github.com/sarakishore/facidocker']])
+stage('Repo Checkout') {
+    steps {
+        checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'Github', url: 'https://github.com/sarakishore/facidocker']])
+    }
+}
+stage('Build') {
+    steps {
+        sh './gradlew build'
+    }
+}
+stage('Docker image ') {
+    steps {
+        sh 'docker build -t facitest:1.0.1 .'
+    }
+}
+stage('Docker Login') {
+    steps {
+        script {
+            withCredentials([usernamePassword(credentialsId: 'Kishoredocker', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                sh 'echo $PASS | docker login -u $USER --password-stdin'
             }
         }
-        stage('Build') {
-            steps {
-                sh './gradlew build'
-            }
+    }
+}
+stage('Push to DockerHub') {
+    steps {
+        sh 'docker tag facitest:1.0.1 kishorelf/facitest:1.0.1'
+        sh 'docker push kishorelf/facitest:1.0.1'
+    }
+}
+stage('Generate k0s Deployment YAML') {
+    steps {
+        script {
+        def deploymentYamlContent = """
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+name: facitest
+spec:
+replicas: 1
+selector:
+matchLabels:
+app: application
+template:
+metadata:
+labels:
+  app: application
+spec:
+containers:
+- name: application
+  image: facitest:1.0.1
+  ports:
+  - containerPort: 8069
+    """
+            writeFile file: 'k0s-deployment.yaml', text: deploymentYamlContent
         }
-        stage('Docker image ') {
-            steps {
-                sh 'docker build -t facitest:1.0.1 .'
-            }
-        }
-        stage('Docker Login') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'Kishoredocker', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
-                        sh 'echo $PASS | docker login -u $USER --password-stdin'
-                    }
-                }
-            }
-        }
-        stage('Push to DockerHub') {
-            steps {
-                sh 'docker tag facitest:1.0.1 kishorelf/facitest:1.0.1'
-                sh 'docker push kishorelf/facitest:1.0.1'
-            }
-        }
-        stage('Generate k0s Deployment YAML') {
-            steps {
-                script {
-                    def deploymentYamlContent = """
-                  apiVersion: apps/v1
-                  kind: Deployment
-                  metadata:
-                    name: facitest
-                  spec:
-                    replicas: 1
-                    selector:
-                      matchLabels:
-                        app: application
-                    template:
-                      metadata:
-                        labels:
-                          app: application
-                      spec:
-                        containers:
-                        - name: application
-                          image: facitest:1.0.1
-                          ports:
-                          - containerPort: 8069
-                            """
-                    writeFile file: 'k0s-deployment.yaml', text: deploymentYamlContent
-                }
-            }
-        }
+    }
+}
         stage('Generate k0s Service YAML') {
             steps {
                 script {
-                    def serviceYamlContent = """
-                    apiVersion: v1
-                    kind: Service
-                    metadata:
-                      name: facitest-service
-                    spec:
-                      selector:
-                        app: application-app
-                      ports:
-                        - protocol: TCP
-                          port: 8082
-                          targetPort: 8082
-                      type: NodePort
-                        """
+def serviceYamlContent = """
+apiVersion: v1
+kind: Service
+metadata:
+name: facitest-service
+spec:
+selector:
+app: application-app
+ports:
+- protocol: TCP
+  port: 8082
+  targetPort: 8082
+type: NodePort
+"""
                     writeFile file: 'k0s-service.yaml', text: serviceYamlContent
                 }
             }
