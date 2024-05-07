@@ -38,22 +38,24 @@ stage('Generate k0s Deployment YAML') {
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-name: facitest
+  name: facikishore
 spec:
-replicas: 1
-selector:
-matchLabels:
-app: application
-template:
-metadata:
-labels:
-  app: application
-spec:
-containers:
-- name: application
-  image: facitest:1.0.1
-  ports:
-  - containerPort: 8069
+  replicas: 1
+  selector:
+    matchLabels:
+      app: application
+  template:
+    metadata:
+      labels:
+        app: application
+    spec:
+      containers:
+      - name: application
+        image: kishorelf/facitest:1.0.1
+        ports:
+        - containerPort: 7788
+
+
     """
             writeFile file: 'k0s-deployment.yaml', text: deploymentYamlContent
         }
@@ -66,15 +68,15 @@ def serviceYamlContent = """
 apiVersion: v1
 kind: Service
 metadata:
-name: facitest-service
+  name: kishorefaci-service
 spec:
-selector:
-app: application-app
-ports:
-- protocol: TCP
-  port: 8082
-  targetPort: 8082
-type: NodePort
+  selector:
+    app: application-app
+  ports:
+    - protocol: TCP
+      port: 8082
+      targetPort: 8082
+  type: NodePort
 """
                     writeFile file: 'k0s-service.yaml', text: serviceYamlContent
                 }
