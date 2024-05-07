@@ -1,4 +1,4 @@
 FROM openjdk:8
-ADD build/libs/sampleapp-2.0.jar test.jar
+ADD build/libs/Facidemo-2.0.jar facitest.jar
 EXPOSE 8067
-ENTRYPOINT ["java","-jar","test.jar"]
+ENTRYPOINT ["java","-jar","facitest.jar"]
