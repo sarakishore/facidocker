@@ -1,0 +1,94 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'Github', url: 'https://github.com/sarakishore/facidocker']])
+            }
+        }
+        stage('Build') {
+            steps {
+                 sh '/opt/gradle-8.5/bin/gradle clean build -x test'
+            }
+        }
+         stage('Build Docker') {
+            steps {
+                sh 'docker build -t kishorelf/faci-container .'
+            }
+        }
+        stage('Docker Login') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'Kishoredocker', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                        sh 'echo $PASS | docker login -u $USER --password-stdin'
+                    }
+                }
+            }
+        }
+         stage('Push to DockerHub') {
+            steps {
+                sh 'docker push kishorelf/faci-container'
+            }
+        }
+        stage('Generate k0s Deployment YAML') {
+            steps {
+                script {
+                    def deploymentYamlContent = """
+                              apiVersion: apps/v1
+                              kind: Deployment
+                              metadata:
+                                name: application
+                              spec:
+                                replicas: 1
+                                selector:
+                                  matchLabels:
+                                    app: application
+                                template:
+                                  metadata:
+                                    labels:
+                                    app: application
+                                spec:
+                                  containers:
+                                  - name: application
+                                    image: kishorelf/faci-container
+                                    ports:
+                                    - containerPort: 8067
+                            """
+                                                writeFile file: 'k0s-deployment.yaml', text: deploymentYamlContent
+                                            }
+                                        }
+                                    }
+        stage('Generate k0s Service YAML') {
+            steps {
+                script {
+                    def serviceYamlContent = """
+                        apiVersion: v1
+                        kind: Service
+                        metadata:
+                          name: application-service
+                        spec:
+                          selector:
+                            app: application-app
+                          ports:
+                            - protocol: TCP
+                              port: 8082
+                              targetPort: 8082
+                          type: NodePort
+                        """
+                         writeFile file: 'k0s-service.yaml', text: serviceYamlContent
+                }
+            }
+        }
+    }
+    post {
+        always {
+            sh 'docker logout'
+        }
+        success {
+            archiveArtifacts artifacts: 'k0s-deployment.yaml', onlyIfSuccessful: true
+            archiveArtifacts artifacts: 'k0s-service.yaml', onlyIfSuccessful: true
+        }
+    }
+}
+
