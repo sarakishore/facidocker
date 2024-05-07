@@ -51,7 +51,7 @@ pipeline {
                       spec:
                         containers:
                         - name: application
-                          image: kishorelf/facitest:1.0.1
+                          image: facitest:1.0.1
                           ports:
                           - containerPort: 8069
                             """
