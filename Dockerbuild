@@ -28,7 +28,7 @@ pipeline {
         stage('Push to DockerHub') {
             steps {
                 sh 'docker tag facitest:1.0.1 kishorelf/faci-container'
-                sh 'docker push kishorelf/faci-container'
+                sh 'docker push facitest:1.0.1'
             }
         }
         stage('Generate k0s Deployment YAML') {
