@@ -38,7 +38,7 @@ pipeline {
                   apiVersion: apps/v1
                   kind: Deployment
                   metadata:
-                    name: application
+                    name: Facitest
                   spec:
                     replicas: 1
                     selector:
@@ -51,9 +51,9 @@ pipeline {
                       spec:
                         containers:
                         - name: application
-                          image: kishorelf/faci-container
+                          image: kishorelf/facitest:1.0.1
                           ports:
-                          - containerPort: 8067
+                          - containerPort: 8069
                             """
                     writeFile file: 'k0s-deployment.yaml', text: deploymentYamlContent
                 }
@@ -66,7 +66,7 @@ pipeline {
                     apiVersion: v1
                     kind: Service
                     metadata:
-                      name: application-service
+                      name: facitest-service
                     spec:
                       selector:
                         app: application-app
