@@ -35,25 +35,25 @@ pipeline {
             steps {
                 script {
                     def deploymentYamlContent = """
-                              apiVersion: apps/v1
-                              kind: Deployment
-                              metadata:
-                                name: application
-                              spec:
-                                replicas: 1
-                                selector:
-                                  matchLabels:
-                                    app: application
-                                template:
-                                  metadata:
-                                    labels:
-                                      app: application
-                                  spec:
-                                    containers:
-                                    - name: application
-                                      image: kishorelf/faci-container
-                                      ports:
-                                      - containerPort: 8067
+                  apiVersion: apps/v1
+                  kind: Deployment
+                  metadata:
+                    name: application
+                  spec:
+                    replicas: 1
+                    selector:
+                      matchLabels:
+                        app: application
+                    template:
+                      metadata:
+                        labels:
+                          app: application
+                      spec:
+                        containers:
+                        - name: application
+                          image: kishorelf/faci-container
+                          ports:
+                          - containerPort: 8067
                             """
                     writeFile file: 'k0s-deployment.yaml', text: deploymentYamlContent
                 }
@@ -63,18 +63,18 @@ pipeline {
             steps {
                 script {
                     def serviceYamlContent = """
-                        apiVersion: v1
-                        kind: Service
-                        metadata:
-                          name: application-service
-                        spec:
-                          selector:
-                            app: application-app
-                          ports:
-                            - protocol: TCP
-                              port: 8082
-                              targetPort: 8082
-                          type: NodePort
+                    apiVersion: v1
+                    kind: Service
+                    metadata:
+                      name: application-service
+                    spec:
+                      selector:
+                        app: application-app
+                      ports:
+                        - protocol: TCP
+                          port: 8082
+                          targetPort: 8082
+                      type: NodePort
                         """
                     writeFile file: 'k0s-service.yaml', text: serviceYamlContent
                 }
