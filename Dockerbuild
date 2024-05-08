@@ -13,7 +13,7 @@ stage('Build') {
 }
 stage('Docker image ') {
     steps {
-        sh 'docker build -t facitest:1.0.1 .'
+        sh 'docker build -t test:1.0.1 .'
     }
 }
 stage('Docker Login') {
@@ -27,8 +27,8 @@ stage('Docker Login') {
 }
 stage('Push to DockerHub') {
     steps {
-        sh 'docker tag facitest:1.0.1 kishorelf/facitest:1.0.1'
-        sh 'docker push kishorelf/facitest:1.0.1'
+        sh 'docker tag test:1.0.1 kishorelf/test:1.0.1'
+        sh 'docker push kishorelf/test:1.0.1'
     }
 }
 stage('Generate k0s Deployment YAML') {
@@ -38,7 +38,7 @@ stage('Generate k0s Deployment YAML') {
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: facikishore
+  name: test
 spec:
   replicas: 1
   selector:
@@ -51,7 +51,7 @@ spec:
     spec:
       containers:
       - name: application
-        image: kishorelf/facitest:1.0.1
+        image: kishorelf/test:1.0.1
         ports:
         - containerPort: 7788
 
@@ -68,7 +68,7 @@ def serviceYamlContent = """
 apiVersion: v1
 kind: Service
 metadata:
-  name: kishorefaci-service
+  name: test-service
 spec:
   selector:
     app: application-app
