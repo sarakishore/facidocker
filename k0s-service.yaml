@@ -7,6 +7,6 @@ spec:
     app: facimate-core
   ports:
     - protocol: "TCP"
-      port: 9092 # The port that the service is running on in the cluster
-      targetPort: 9092 # The port exposed by the service
+      port: 8082 # The port that the service is running on in the cluster
+      targetPort: 8082 # The port exposed by the service
   type: NodePort # type of the service.
