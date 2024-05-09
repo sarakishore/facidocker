@@ -1,7 +1,7 @@
 FROM openjdk:8
 
 # Copy the JAR file
-ADD build/libs/test-2.0.jar test.jar
+ADD build/libs/Facidemo-2.0.jar test.jar
 
 # Expose port
 EXPOSE 8068
