@@ -1,20 +1,26 @@
 apiVersion: apps/v1
-kind: Deployment # Kubernetes resource kind we are creating
+kind: Deployment
 metadata:
-  name: facimate
+  name: facimategke
+  namespace: default
 spec:
   selector:
     matchLabels:
-      app: facimate-core
-  replicas: 3
+      app: facimate
+  replicas: 1
   template:
     metadata:
       labels:
-        app: facimate-core
+        app: facimate
     spec:
       containers:
-        - name: faci-core
-          image: kishorelf/facimate:1.0.1
-          imagePullPolicy: IfNotPresent
+        - name: facimategke
+          image: 192.168.1.30:8082/facimate-gke:1.0.1
+          imagePullPolicy: Always
           ports:
-            - containerPort: 6000
+            - containerPort: 9000
+          env:
+            - name: NEXUS_USERNAME
+              value: "admin"
+            - name: NEXUS_PASSWORD
+              value: "lfadmin"
